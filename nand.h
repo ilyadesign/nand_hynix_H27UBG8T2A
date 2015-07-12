@@ -30,6 +30,8 @@
 
 
 
+extern uint8_t dataBuf[PHYSICAL_PAGE_SIZE];
+
 
 //hynix H27UBG8T2ATR ID: 
 //  1   0xAD   manufucture hynix 
@@ -130,5 +132,6 @@ uint8_t Nand_ReadStatusReg(void);
 void Nand_ReadPage(uint16_t column, uint8_t page, uint8_t plane, uint16_t block, uint8_t * dataBuf);
 uint8_t Nand_ProgramPage(uint16_t column, uint8_t page, uint8_t plane, uint16_t block, uint8_t * dataBuf);
 uint8_t Nand_EraseBlock(uint8_t plane, uint16_t block);
+void Nand_BadBlockScan(uint8_t * badBlockMap);
  
 #endif //NAND_H
