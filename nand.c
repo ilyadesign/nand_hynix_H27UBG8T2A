@@ -1,6 +1,8 @@
 
 #include "nand.h"
 
+uint8_t dataBuf[PHYSICAL_PAGE_SIZE];
+
 void Nand_InitPins(void)
 {
     GPIO_PinModeSet(CE_PORT, CE_PIN, gpioModePushPull, 1);
@@ -100,4 +102,33 @@ uint8_t Nand_EraseBlock(uint8_t plane, uint16_t block)
     status = Nand_ReadStatusReg();
     SET_CE(); //disable NAND
     return status;
+}
+
+/************************************/
+/************************************/
+void Nand_BadBlockScan(uint8_t * badBlockMap)
+{
+    uint16_t block;
+    uint16_t column = PAGE_SIZE;
+    uint8_t  plane;
+
+    
+    for (plane = 0; plane < PLANE_IN_DIE; plane++)
+    {
+        for (block = 0; block < PLANE_SIZE_BLOCKS; block++)
+        {
+            Nand_ReadPage(column, 0, plane, block, dataBuf); // check first page
+            if (dataBuf[0] != 0xFF)
+            {
+                badBlockMap[((block << 1) | plane) / 8] = 1 << (((block << 1) | plane) % 8);
+                continue;
+            }
+            Nand_ReadPage(column, (BLOCK_SIZE_PAGES -1), plane, block, dataBuf); //check last page
+            if (dataBuf[0] != 0xFF)
+            {
+                badBlockMap[((block << 1) | plane) / 8] = 1 << (((block << 1) | plane) % 8);
+                continue;
+            }  
+        }
+    }
 }
