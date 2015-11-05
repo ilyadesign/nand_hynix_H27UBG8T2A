@@ -1,4 +1,3 @@
-
 #include "nand.h"
 
 uint8_t dataBuf[PHYSICAL_PAGE_SIZE];
@@ -26,6 +25,41 @@ void Nand_GetID(NandID * idBuf)
     Nand_ReadData((uint8_t *)idBuf, sizeof(NandID));
     
     SET_CE(); //disable NAND
+}
+
+
+/************************************/
+/************************************/
+void Nand_ReadParamPage(NandParams * dataBuf)
+{   
+    CLEAR_CE(); //enable nand
+    
+    Nand_SendCommand(CMD_READ_PARAM_PAGE);
+    Nand_SendAdressByte(0x00);
+    Nand_ReadData((uint8_t *)dataBuf, sizeof(NandParams));
+    
+    SET_CE(); //disable NAND
+}
+/************************************/
+/************************************/
+bool Nand_DetectONFI(void)
+{   
+    bool onfi = false;
+    CLEAR_CE(); //enable nand
+    
+    Nand_SendCommand(CMD_READ_ID);
+    Nand_SendAdressByte(0x20);
+    
+    if (Nand_ReadByte() == 'O' && 
+        Nand_ReadByte() == 'N' &&
+	Nand_ReadByte() == 'F' && 
+        Nand_ReadByte() == 'I')
+    {
+        onfi = true;
+    }
+    
+    SET_CE(); //disable NAND
+    return onfi;
 }
 
 /************************************/
